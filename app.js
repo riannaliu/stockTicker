@@ -1,4 +1,5 @@
 const express = require("express");
+require('dotenv').config();
 const { MongoClient } = require("mongodb");
 const fs = require("fs");
 require("dotenv").config(); // Load .env file for MongoDB URI
