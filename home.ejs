@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name = "viewport" content="widtch=device-widtch, initial-scale=1.0">
+    <title>Home - Stock App</title>
+</head>
+<body>
+    <h1>Stock Search</h1>
+    <form action="/process" method="GET">
+        <label for="search">Search:</label>
+        <input type ="text" id ="search" name= "search" required>
+        <br>
+        <input type="radio" id="ticker" name="searchType" value="ticker" required>
+        <label for="ticker">Ticker</label>
+        <input type="radio" id="company" name="searchType" value="company" required>
+        <label for="compnay">Company</label>
+        <br><br>
+        <button type="submit">Search</button>
+    </form>
+</body>
+</html>
