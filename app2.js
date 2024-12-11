@@ -19,8 +19,6 @@ app.use(express.static("public"));
 
 connectDB();
 
-
-
 // Routes
 
 // Route 1: Insert data from file
@@ -55,7 +53,7 @@ app.get("/insert-data", async (req, res) => {
 
 // Route 2: Home View (Search Form)
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname,"public","home.html"));
+  res.sendFile(path.join(__dirname, "public", "home.html"));
 });
 
 // Route 3: Process Search Query
@@ -74,10 +72,17 @@ app.get("/process", async (req, res) => {
 
     if (results.length === 0) {
       console.log("No matching records found.");
-      res.send("No results found. Please try again.");
     } else {
-      console.log("Results:", results);
+      // Display results in the console
+      console.log("Search results:");
+      results.forEach(result => {
+        console.log(`Company: ${result.companyName} | Ticker: ${result.stockTicker} | Price: $${result.latestPrice}`);
+      });
     }
+
+    // Optional: Send response back to the user (can be a success message)
+    res.send("Search completed. Check the console for results.");
+
   } catch (error) {
     console.error("Error fetching data:", error.message);
     res.status(500).send("Internal Server Error");
@@ -86,3 +91,4 @@ app.get("/process", async (req, res) => {
 
 // Start server
 app.listen(PORT, () => console.log(`Server is running on http://localhost:${PORT}`));
+
