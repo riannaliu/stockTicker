@@ -1,9 +1,8 @@
-const express = require("express");
+const http = require("http");
 const { MongoClient } = require("mongodb");
 const fs = require("fs");
 const path = require("path");
 
-const app = express();
 const PORT = process.env.PORT || 3000;
 
 // MongoDB connection
@@ -15,80 +14,59 @@ async function connectDB() {
   console.log("Connected to MongoDB");
 }
 
-app.use(express.static("public"));
-
 connectDB();
 
-// Routes
+// Server and Routing
+http.createServer(async (req, res) => {
+  const url = req.url;
 
-// Route 1: Insert data from file
-app.get("/insert-data", async (req, res) => {
-  try {
+  if (url === "/") {
+    // Home page
+    res.writeHead(200, { "Content-Type": "text/html" });
+    const homePage = fs.readFileSync(path.join(__dirname, "public", "home.html"), "utf8");
+    res.write(homePage);
+    res.end();
+
+  } else if (url.startsWith("/process")) {
+    // Process Search Query
+    const urlParams = new URLSearchParams(url.split("?")[1]);
+    const search = urlParams.get("search");
+    const searchType = urlParams.get("searchType");
+
     const db = client.db("Stock");
     const collection = db.collection("PublicCompanies");
 
-    const fileName = "companies.csv";
-    const data = fs.readFileSync(fileName, "utf8").split("\n");
+    try {
+      let results = [];
+      if (searchType === "ticker") {
+        results = await collection.find({ stockTicker: new RegExp(search, "i") }).toArray();
+      } else if (searchType === "company") {
+        results = await collection.find({ companyName: new RegExp(search, "i") }).toArray();
+      }
 
-    // Skip the header and process each line
-    for (let i = 1; i < data.length; i++) {
-      const line = data[i].trim();
-      if (!line) continue; // Skip empty lines
+      res.writeHead(200, { "Content-Type": "text/plain" });
+      if (results.length === 0) {
+        res.write("No results found.");
+      } else {
+        results.forEach(result => {
+          res.write(`Company: ${result.companyName} | Ticker: ${result.stockTicker} | Price: $${result.latestPrice}\n`);
+        });
+      }
+      res.end();
 
-      const [companyName, stockTicker, stockPrice] = line.split(",");
-      await collection.insertOne({
-        companyName: companyName.trim(),
-        stockTicker: stockTicker.trim(),
-        latestPrice: parseFloat(stockPrice.trim()),
-      });
+    } catch (error) {
+      res.writeHead(500, { "Content-Type": "text/plain" });
+      res.write("Internal Server Error");
+      res.end();
+      console.error("Error fetching data:", error.message);
     }
 
-    console.log("Data inserted successfully!");
-    res.send("Data inserted successfully!");
-  } catch (error) {
-    console.error("Error inserting data:", error.message);
-    res.status(500).send("Error inserting data");
+  } else {
+    // 404 Not Found
+    res.writeHead(404, { "Content-Type": "text/plain" });
+    res.write("404 Not Found");
+    res.end();
   }
+}).listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
-
-// Route 2: Home View (Search Form)
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "home.html"));
-});
-
-// Route 3: Process Search Query
-app.get("/process", async (req, res) => {
-  const { search, searchType } = req.query;
-  const db = client.db("Stock");
-  const collection = db.collection("PublicCompanies");
-
-  try {
-    let results = [];
-    if (searchType === "ticker") {
-      results = await collection.find({ stockTicker: new RegExp(search, "i") }).toArray();
-    } else if (searchType === "company") {
-      results = await collection.find({ companyName: new RegExp(search, "i") }).toArray();
-    }
-
-    if (results.length === 0) {
-      console.log("No matching records found.");
-    } else {
-      // Display results in the console
-      console.log("Search results:");
-      results.forEach(result => {
-        console.log(`Company: ${result.companyName} | Ticker: ${result.stockTicker} | Price: $${result.latestPrice}`);
-      });
-    }
-
-    // Optional: Send response back to the user (can be a success message)
-    res.send("Search completed. Check the console for results.");
-
-  } catch (error) {
-    console.error("Error fetching data:", error.message);
-    res.status(500).send("Internal server Error");
-  }
-});
-
-// Start server
-app.listen(PORT, () => console.log(`Server is running on http://localhost:${PORT}`));
-
