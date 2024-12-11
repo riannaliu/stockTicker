@@ -52,7 +52,7 @@ app.get("/insert-data", async (req, res) => {
 
 // Route 2: Home View (Search Form)
 app.get("/", (req, res) => {
-  res.render("views/home.html");
+  res.sendFile("views/home.html");
 });
 
 // Route 3: Process Search Query
