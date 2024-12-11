@@ -1,6 +1,7 @@
 const express = require("express");
 const { MongoClient } = require("mongodb");
 const fs = require("fs");
+const path = require("path");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -13,6 +14,8 @@ async function connectDB() {
   await client.connect();
   console.log("Connected to MongoDB");
 }
+
+app.use(express.static("public"));
 
 connectDB();
 
@@ -52,7 +55,7 @@ app.get("/insert-data", async (req, res) => {
 
 // Route 2: Home View (Search Form)
 app.get("/", (req, res) => {
-  res.sendFile("views/home.html");
+  res.sendFile(path.join(__dirname,"public","home.html"));
 });
 
 // Route 3: Process Search Query
