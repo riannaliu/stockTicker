@@ -1,8 +1,6 @@
 const express = require("express");
-require('dotenv').config();
 const { MongoClient } = require("mongodb");
 const fs = require("fs");
-require("dotenv").config(); // Load .env file for MongoDB URI
 
 const app = express();
 const PORT = process.env.PORT || 3000;
