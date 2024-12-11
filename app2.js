@@ -77,7 +77,7 @@ app.get("/process", async (req, res) => {
       res.send("No results found. Please try again.");
     } else {
       console.log("Results:", results);
-      res.render("results", { results });
+      res.sendFile(path.join(__dirname,"public","results.html"));
     }
   } catch (error) {
     console.error("Error fetching data:", error.message);
