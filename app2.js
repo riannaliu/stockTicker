@@ -16,9 +16,7 @@ async function connectDB() {
 
 connectDB();
 
-// Middleware
-app.set("view engine", "ejs");
-app.use(express.static("public")); // Serve static files
+
 
 // Routes
 
@@ -54,7 +52,7 @@ app.get("/insert-data", async (req, res) => {
 
 // Route 2: Home View (Search Form)
 app.get("/", (req, res) => {
-  res.render("home");
+  res.render("views/home.html");
 });
 
 // Route 3: Process Search Query
